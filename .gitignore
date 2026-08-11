@@ -1,0 +1,68 @@
+# ==========================================
+# Python Byte-compiled & Cache Files
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ==========================================
+# Datasets (Excluded to keep repo small & clean)
+# ==========================================
+data/
+*.zip
+*.tar
+*.gz
+*.npy
+
+# ==========================================
+# Large Model Weights & Checkpoints
+# ==========================================
+# Keeps intermediate checkpoints hidden
+weights/*.pt
+weights/*.h5
+weights/*.onnx
+
+# NOTE: If your final weights/model_final.pt is under 100MB 
+# and you want to track it directly in git, uncomment the line below:
+# !weights/model_final.pt
+
+# ==========================================
+# Output Directories & Temporary Results
+# ==========================================
+restored_outputs/
+output/
+outputs/
+*.png
+
+# ==========================================
+# Virtual Environments & Packages
+# ==========================================
+venv/
+.venv/
+env/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+
+# ==========================================
+# IDEs, Editors & OS System Junk
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+__MACOSX/
