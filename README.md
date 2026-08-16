@@ -4,7 +4,6 @@
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-orange)
 ![CUDA](https://img.shields.io/badge/CUDA-Accelerated-green)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
 **NanoClear** is an end-to-end deep learning framework designed for simultaneous **speckle despeckling, Gaussian deblurring, and 2× super-resolution** on single-channel grayscale semiconductor wafer inspection imagery[cite: 6].
 
