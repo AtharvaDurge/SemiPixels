@@ -7,7 +7,6 @@ class SimpleGate(nn.Module):
         x1, x2 = x.chunk(2, dim=1)
         return x1 * x2
 
-
 class NAFBlock(nn.Module):
     def __init__(self, c, DW_Expand=2, FFN_Expand=2, drop_out_rate=0.):
         super().__init__()
@@ -64,9 +63,8 @@ class NAFBlock(nn.Module):
 
         return y + x * self.gamma
 
-
 class NAFNetSR(nn.Module):
-    def __init__(self, img_channel=1, width=32, middle_blk_num=2, enc_blk_nums=[2, 2], dec_blk_nums=[2, 2], scale_factor=2):
+    def __init__(self, img_channel=1, width=32, middle_blk_num=2, enc_blk_nums=[2, 2, 2], dec_blk_nums=[2, 2, 2], scale_factor=2):
         super().__init__()
         self.scale_factor = scale_factor
 
@@ -101,34 +99,22 @@ class NAFNetSR(nn.Module):
         )
 
     def forward(self, x):
-        x = self.intro(x)
+        base = F.interpolate(x, scale_factor=self.scale_factor, mode='bicubic', align_corners=False)
+
+        x_feat = self.intro(x)
         
         encs = []
         for encoder, down in zip(self.encoders, self.downs):
-            x = encoder(x)
-            encs.append(x)
-            x = down(x)
+            x_feat = encoder(x_feat)
+            encs.append(x_feat)
+            x_feat = down(x_feat)
 
-        x = self.middle_blks(x)
+        x_feat = self.middle_blks(x_feat)
 
         for decoder, up, enc_skip in zip(self.decoders, self.ups, reversed(encs)):
-            x = up(x)
-            x = x + enc_skip
-            x = decoder(x)
+            x_feat = up(x_feat)
+            x_feat = x_feat + enc_skip
+            x_feat = decoder(x_feat)
 
-        out = self.sr_head(x)
-        return out
-
-
-if __name__ == "__main__":
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = NAFNetSR(img_channel=1, scale_factor=2).to(device)
-    
-    dummy_input = torch.randn(1, 1, 128, 128).to(device)
-    
-    with torch.no_grad():
-        output = model(dummy_input)
-
-    print(f"Model successfully loaded on {device}!")
-    print(f"Input Shape  : {dummy_input.shape}")
-    print(f"Output Shape : {output.shape} (Expected: [1, 1, 256, 256])")
+        res = self.sr_head(x_feat)
+        return base + res

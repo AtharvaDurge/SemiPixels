@@ -1,14 +1,17 @@
 import os
 import glob
+import random
 import numpy as np
 import torch
 from torch.utils.data import Dataset
 
 class SemiconductorDataset(Dataset):
-    def __init__(self, degraded_dir, gt_dir=None, is_train=True):
+    def __init__(self, degraded_dir, gt_dir=None, patch_size=128, scale=2, is_train=True):
         super().__init__()
         self.degraded_dir = degraded_dir
         self.gt_dir = gt_dir
+        self.patch_size = patch_size
+        self.scale = scale
         self.is_train = is_train
 
         self.degraded_paths = sorted(glob.glob(os.path.join(degraded_dir, "*.npy")))
@@ -23,40 +26,63 @@ class SemiconductorDataset(Dataset):
     def __len__(self):
         return len(self.degraded_paths)
 
-    def normalize_intensity(self, img):
-        # Force float32 precision
+    @staticmethod
+    def normalize(img):
         img = img.astype(np.float32)
-        p1, p99 = np.percentile(img, (0.1, 99.9))
-        img = np.clip(img, p1, p99)
-        img = (img - p1) / (p99 - p1 + 1e-6)
-        return img.astype(np.float32), p1, p99
+        min_val = float(img.min())
+        max_val = float(img.max())
+        img_norm = (img - min_val) / (max_val - min_val + 1e-7)
+        return img_norm, min_val, max_val
+
+    def _augment(self, deg_patch, gt_patch):
+        if random.random() > 0.5:
+            deg_patch = np.fliplr(deg_patch)
+            gt_patch = np.fliplr(gt_patch)
+        if random.random() > 0.5:
+            deg_patch = np.flipud(deg_patch)
+            gt_patch = np.flipud(gt_patch)
+        k = random.randint(0, 3)
+        if k > 0:
+            deg_patch = np.rot90(deg_patch, k)
+            gt_patch = np.rot90(gt_patch, k)
+        return deg_patch.copy(), gt_patch.copy()
 
     def __getitem__(self, index):
         deg_path = self.degraded_paths[index]
+        deg_raw = np.load(deg_path).astype(np.float32)
         
-        # Load raw numpy array as float32
-        deg_img = np.load(deg_path).astype(np.float32)
-        deg_norm, _, _ = self.normalize_intensity(deg_img)
-        
-        if deg_norm.ndim == 2:
-            deg_tensor = torch.from_numpy(deg_norm).unsqueeze(0)
-        else:
-            deg_tensor = torch.from_numpy(deg_norm).permute(2, 0, 1)
+        if deg_raw.ndim == 3:
+            deg_raw = deg_raw.squeeze(-1)
+
+        deg_norm, d_min, d_max = self.normalize(deg_raw)
 
         if self.gt_paths is not None:
             gt_path = self.gt_paths[index]
-            gt_img = np.load(gt_path).astype(np.float32)
-            
-            gt_norm, _, _ = self.normalize_intensity(gt_img)
-            if gt_norm.ndim == 2:
-                gt_tensor = torch.from_numpy(gt_norm).unsqueeze(0)
-            else:
-                gt_tensor = torch.from_numpy(gt_norm).permute(2, 0, 1)
+            gt_raw = np.load(gt_path).astype(np.float32)
+            if gt_raw.ndim == 3:
+                gt_raw = gt_raw.squeeze(-1)
 
-            return deg_tensor, gt_tensor, os.path.basename(deg_path)
+            gt_norm, g_min, g_max = self.normalize(gt_raw)
 
-        return deg_tensor, os.path.basename(deg_path)
+            if self.is_train and self.patch_size is not None:
+                h_deg, w_deg = deg_norm.shape
+                ps_deg = min(self.patch_size, h_deg, w_deg)
+                ps_gt = ps_deg * self.scale
 
+                top_d = random.randint(0, h_deg - ps_deg)
+                left_d = random.randint(0, w_deg - ps_deg)
+                top_g = top_d * self.scale
+                left_g = left_d * self.scale
 
-if __name__ == "__main__":
-    print("dataset.py initialized with float32 casting.")
+                deg_norm = deg_norm[top_d:top_d + ps_deg, left_d:left_d + ps_deg]
+                gt_norm = gt_norm[top_g:top_g + ps_gt, left_g:left_g + ps_gt]
+
+                deg_norm, gt_norm = self._augment(deg_norm, gt_norm)
+
+            deg_tensor = torch.from_numpy(deg_norm).unsqueeze(0).float()
+            gt_tensor = torch.from_numpy(gt_norm).unsqueeze(0).float()
+
+            return deg_tensor, gt_tensor, g_min, g_max, os.path.basename(deg_path)
+
+        deg_tensor = torch.from_numpy(deg_norm).unsqueeze(0).float()
+        return deg_tensor, d_min, d_max, os.path.basename(deg_path)
