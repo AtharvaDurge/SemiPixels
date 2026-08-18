@@ -85,8 +85,13 @@ python run.py data/test output
 
 ---
 
-## 🛠️ Tech Stack & Requirements
+## 🛠️ Tech Staack & Requirements
 
 * **Language**: Python 3.10+
 * **Deep Learning**: PyTorch (CUDA-enabled), Torchvision
 * **Numerical & Image Processing**: NumPy, OpenCV, Scikit-Image, Pillow
+
+## Team Members
+
+- **Atharva Durge**-[@AtharvaDurge](https://github.com/AtharvaDurge)
+- **Aryan Parab** -[@ap6458](https://github.com/ap6458)
