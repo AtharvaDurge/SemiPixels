@@ -64,6 +64,42 @@ python run.py <input-dir> <output-dir>
 python run.py data/test output
 
 ```
+---
+
+## 🧠 Model Architecture
+
+NanoClear uses a **NAFNet-SR** based restoration architecture consisting of:
+
+1. **Input Processing** – Accepts single-channel grayscale `.npy` images.
+2. **NAFNet Feature Extraction** – Extracts and restores spatial features using nonlinear activation-free blocks.
+3. **Image Restoration** – Performs despeckling and Gaussian deblurring.
+4. **PixelShuffle Upsampling** – Performs 2× spatial super-resolution using sub-pixel convolution.
+5. **Test-Time Augmentation** – Uses 8 transformations during inference and aggregates the predictions.
+6. **Output Normalization** – Produces a 2D floating-point array normalized to `[0, 1]`.
+
+```text
+Input Image
+     │
+     ▼
+NAFNet-SR
+     │
+     ├── Feature Extraction
+     │
+     ├── Despeckling
+     │
+     ├── Deblurring
+     │
+     ▼
+PixelShuffle ×2
+     │
+     ▼
+8× Test-Time Augmentation
+     │
+     ▼
+Prediction Aggregation
+     │
+     ▼
+Restored 2× Image
 
 ### Pipeline Features & Guarantees
 
@@ -85,7 +121,7 @@ python run.py data/test output
 
 ---
 
-## 🛠️ Tech Staack & Requirements
+## 🛠️ Tech Stack & Requirements
 
 * **Language**: Python 3.10+
 * **Deep Learning**: PyTorch (CUDA-enabled), Torchvision
