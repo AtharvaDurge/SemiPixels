@@ -127,4 +127,5 @@ Restored 2× Image
 
 * **Atharva Durge** – [@AtharvaDurge](https://github.com/AtharvaDurge)
 * **Aryan Parab** – [@ap6458](https://github.com/ap6458)
+* **Arya Shirke** – [@AryaShirke16](https://github.com/AryaShirke16)
 
