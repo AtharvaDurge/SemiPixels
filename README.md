@@ -100,6 +100,7 @@ Prediction Aggregation
      │
      ▼
 Restored 2× Image
+```
 
 ### Pipeline Features & Guarantees
 
