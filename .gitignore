@@ -1,68 +1,32 @@
-# ==========================================
-# Python Byte-compiled & Cache Files
-# ==========================================
+# Byte-compiled / optimized / cache files
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
+.ipynb_checkpoints/
 
-# ==========================================
-# Datasets (Excluded to keep repo small & clean)
-# ==========================================
+# Virtual Environment
+venv/
+env/
+.env/
+
+# Datasets and raw archives
 data/
 *.zip
 *.tar
 *.gz
-*.npy
 
-# ==========================================
-# Large Model Weights & Checkpoints
-# ==========================================
-# Keeps intermediate checkpoints hidden
-weights/*.pt
-weights/*.h5
-weights/*.onnx
-
-# NOTE: If your final weights/model_final.pt is under 100MB 
-# and you want to track it directly in git, uncomment the line below:
-# !weights/model_final.pt
-
-# ==========================================
-# Output Directories & Temporary Results
-# ==========================================
-restored_outputs/
+# Output and temporary directories
+test_output/
 output/
-outputs/
-*.png
+runs/
+logs/
 
-# ==========================================
-# Virtual Environments & Packages
-# ==========================================
-venv/
-.venv/
-env/
-ENV/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-
-# ==========================================
-# IDEs, Editors & OS System Junk
-# ==========================================
+# IDE / OS specific files
 .vscode/
 .idea/
-*.swp
-*.swo
 .DS_Store
 Thumbs.db
-__MACOSX/
+
+# Ensure submission weights are NOT ignored
+!weights/
+!weights/model_best.pt
